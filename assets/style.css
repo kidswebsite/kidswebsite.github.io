@@ -1,0 +1,78 @@
+:root{
+  --bg:#fbf8f3; --surface:#ffffff; --ink:#1c1917; --muted:#6b6560;
+  --line:#e7e1d8; --accent:#c2410c; --shadow:0 1px 2px rgba(28,25,23,.05),0 8px 24px rgba(28,25,23,.06);
+  --radius:16px; --maxw:960px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14120f; --surface:#1e1b17; --ink:#f5f1ea; --muted:#a8a099;
+    --line:#2e2a25; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14120f; --surface:#1e1b17; --ink:#f5f1ea; --muted:#a8a099;
+  --line:#2e2a25; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:16px/1.65 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+}
+img{max-width:100%; height:auto; display:block}
+a{color:inherit}
+.wrap{max-width:var(--maxw); margin:0 auto; padding:0 16px}
+
+/* ---------- hero ---------- */
+.hero{position:relative; overflow:hidden; background:#0d0f14}
+.hero img{width:100%; aspect-ratio:16/7; object-fit:cover; opacity:.82}
+@media (max-width:640px){ .hero img{aspect-ratio:4/3} }
+.hero__veil{position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.05) 40%,rgba(0,0,0,.72) 100%)}
+.hero__text{position:absolute; left:0; right:0; bottom:0; padding:0 16px 28px}
+.hero__inner{max-width:var(--maxw); margin:0 auto; color:#fff}
+.hero h1{
+  margin:0 0 .25em; font-size:clamp(2rem,6vw,3.5rem); line-height:1.05;
+  font-weight:800; letter-spacing:-.02em; text-shadow:0 2px 18px rgba(0,0,0,.45);
+}
+.hero p{margin:0; max-width:46ch; color:rgba(255,255,255,.88); font-size:clamp(.95rem,2.2vw,1.1rem)}
+.credit{font-size:.75rem; color:var(--muted); text-align:right; padding:8px 16px 0; max-width:var(--maxw); margin:0 auto}
+.credit a{color:var(--muted)}
+
+/* ---------- name cards ---------- */
+.names{display:grid; gap:16px; grid-template-columns:repeat(3,1fr); margin:40px auto 56px}
+@media (max-width:760px){ .names{grid-template-columns:1fr} }
+.card{
+  display:block; text-decoration:none; background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius); padding:26px 22px 22px; box-shadow:var(--shadow);
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  position:relative; overflow:hidden;
+}
+.card::before{content:""; position:absolute; inset:0 0 auto 0; height:5px; background:var(--k)}
+.card:hover,.card:focus-visible{transform:translateY(-3px); box-shadow:0 4px 8px rgba(28,25,23,.06),0 16px 40px rgba(28,25,23,.12); border-color:var(--k)}
+.card .initial{
+  font-size:2.6rem; font-weight:800; line-height:1; color:var(--k); letter-spacing:-.03em;
+}
+.card h2{margin:.5rem 0 .15rem; font-size:1.3rem; letter-spacing:-.01em}
+.card .sub{margin:0; color:var(--muted); font-size:.9rem}
+.card .go{margin-top:14px; font-size:.85rem; font-weight:600; color:var(--k)}
+
+/* ---------- kid page ---------- */
+.topbar{border-bottom:1px solid var(--line); background:var(--surface)}
+.topbar .wrap{display:flex; align-items:center; gap:14px; height:58px}
+.topbar a.back{text-decoration:none; font-size:.9rem; color:var(--muted); font-weight:600}
+.topbar a.back:hover{color:var(--ink)}
+.kidhead{padding:40px 0 8px; border-bottom:1px solid var(--line)}
+.kidhead h1{margin:0; font-size:clamp(1.8rem,5vw,2.6rem); letter-spacing:-.02em; color:var(--k)}
+.kidhead p{margin:.4rem 0 24px; color:var(--muted)}
+
+.posts{list-style:none; margin:0; padding:0}
+.post{padding:32px 0; border-bottom:1px solid var(--line)}
+.post:last-child{border-bottom:none}
+.post time{display:block; font-size:.78rem; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin-bottom:.4rem}
+.post h3{margin:0 0 .6rem; font-size:1.25rem; letter-spacing:-.01em}
+.post .body p{margin:0 0 1em; white-space:pre-wrap}
+.post .body p:last-child{margin-bottom:0}
+.gallery{display:grid; gap:10px; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); margin-top:16px}
+.gallery img{border-radius:12px; border:1px solid var(--line); background:var(--surface)}
+.empty{padding:56px 0; color:var(--muted); text-align:center}
+footer{padding:40px 0 60px; color:var(--muted); font-size:.85rem; text-align:center}

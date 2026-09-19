@@ -1,0 +1,15 @@
+{
+  "title": "Three Kids, One City",
+  "tagline": "Three children, one city, and whatever they feel like telling the world.",
+  "city": "Edinburgh",
+  "base_url": "",
+  "kids": [
+    { "slug": "olivia",  "name": "Olivia Bolivia",  "short": "Olivia",  "colour": "#c2410c" },
+    { "slug": "treevor", "name": "Treevor Trovor",  "short": "Treevor", "colour": "#1d4ed8" },
+    { "slug": "jamie",   "name": "Jamie Johnney",   "short": "Jamie",   "colour": "#15803d" }
+  ],
+  "photo_credit": {
+    "text": "Edinburgh from Calton Hill — photo by Strevo, CC BY 2.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Edinburgh_Skyline_Panorama.jpg"
+  }
+}
