@@ -1,1 +1,18 @@
-{"posts": []}
+{
+  "posts": [
+    {
+      "id": "20260919-4cb019ef",
+      "date": "2026-09-19T12:16:24+01:00",
+      "title": "test",
+      "body": "test",
+      "images": []
+    },
+    {
+      "id": "20260919-99bab01e",
+      "date": "2026-09-19T12:32:21+01:00",
+      "title": "TEST",
+      "body": "[image: C80F71A7-D268-4562-A72E-91B858411BD2.heic]\ni saw this at school",
+      "images": []
+    }
+  ]
+}
