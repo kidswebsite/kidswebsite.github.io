@@ -16,6 +16,10 @@ Environment variables (set as GitHub Actions secrets):
 
 The subject becomes the post title, the body the text, and attached or inline
 photos the gallery.
+
+To delete a post, the same child resends it with "delete:" in front of the
+subject. "delete: last" removes their most recent post. A child can only ever
+delete their own.
 """
 import os, re, ssl, json, email, imaplib, hashlib, pathlib, mimetypes, datetime
 from email.header import decode_header, make_header
@@ -139,6 +143,42 @@ def save_image(slug, post_id, index, filename, ctype, payload):
     return f"media/{slug}/{path.name}"
 
 
+DELETE_RE = re.compile(r"^\s*delete\s*:\s*(.*)$", re.I)
+
+
+def norm(t):
+    return re.sub(r"\s+", " ", (t or "")).strip().lower()
+
+
+def delete_post(slug, target):
+    """Remove one of this child's own posts, and its photo files with it.
+
+    `target` is the original subject line, i.e. what follows "delete:". Empty,
+    or the word "last", means the most recent post. Only ever touches the
+    sender's own page, so nobody can delete a sibling's post.
+    """
+    f = ROOT / "content" / f"{slug}.json"
+    if not f.exists():
+        return None
+    data = json.loads(f.read_text(encoding="utf-8"))
+    posts = sorted(data["posts"], key=lambda p: p.get("date", ""), reverse=True)
+
+    if norm(target) in ("", "last"):
+        match = posts[0] if posts else None
+    else:
+        match = next((p for p in posts if norm(p.get("title")) == norm(target)), None)
+    if match is None:
+        return None
+
+    for img in match.get("images", []):
+        path = ROOT / img["src"]
+        if path.is_file():
+            path.unlink()
+    data["posts"] = [p for p in data["posts"] if p.get("id") != match.get("id")]
+    f.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return match
+
+
 def add_post(slug, post):
     f = ROOT / "content" / f"{slug}.json"
     data = json.loads(f.read_text(encoding="utf-8")) if f.exists() else {"posts": []}
@@ -155,7 +195,7 @@ def main():
     imap.select(FOLDER)
     uids = imap.search(None, "UNSEEN")[1][0].split()
     print(f"{len(uids)} unread message(s)")
-    added = ignored = 0
+    added = ignored = removed = 0
 
     for uid in uids:
         msg = email.message_from_bytes(imap.fetch(uid, "(BODY.PEEK[])")[1][0][1])
@@ -168,6 +208,15 @@ def main():
             domain = sender.split("@")[-1] if "@" in sender else "?"
             print(f"  ignored, sender not on the list (@{domain})")
             ignored += 1
+            continue
+
+        command = DELETE_RE.match(subject)
+        if command:
+            gone = delete_post(slug, command.group(1))
+            print(f"  - {slug}: post deleted" if gone
+                  else f"  - {slug}: delete request matched nothing")
+            removed += 1 if gone else 0
+            imap.store(uid, "+FLAGS", "\\Seen")
             continue
 
         try:
@@ -198,7 +247,7 @@ def main():
 
     imap.close()
     imap.logout()
-    print(f"{added} new post(s), {ignored} ignored")
+    print(f"{added} new post(s), {removed} deleted, {ignored} ignored")
 
 
 if __name__ == "__main__":

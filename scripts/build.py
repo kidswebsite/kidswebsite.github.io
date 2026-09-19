@@ -28,7 +28,8 @@ def head(title, extra_style=""):
 def build_index():
     cards = []
     for k in SITE["kids"]:
-        posts = load_posts(k["slug"])
+        posts = load_posts(k["slug"]) + load_posts(k["slug"], archived=True)
+        posts.sort(key=lambda p: p.get("date", ""), reverse=True)
         n = len(posts)
         sub = "Nothing posted yet" if n == 0 else (f"{n} post" if n == 1 else f"{n} posts")
         if posts:
@@ -65,11 +66,12 @@ def build_index():
     (ROOT / "index.html").write_text(out, encoding="utf-8")
 
 
-def load_posts(slug):
+def load_posts(slug, archived=False):
     f = ROOT / "content" / f"{slug}.json"
     if not f.exists():
         return []
-    posts = json.loads(f.read_text(encoding="utf-8")).get("posts", [])
+    posts = [p for p in json.loads(f.read_text(encoding="utf-8")).get("posts", [])
+             if bool(p.get("archived")) == archived]
     return sorted(posts, key=lambda p: p.get("date", ""), reverse=True)
 
 
@@ -88,8 +90,7 @@ def paras(text):
     return "\n".join(f"<p>{esc(b)}</p>" for b in blocks) or "<p></p>"
 
 
-def build_kid(k):
-    posts = load_posts(k["slug"])
+def render_posts(k, posts):
     items = []
     for p in posts:
         imgs = "".join(
@@ -98,35 +99,66 @@ def build_kid(k):
         )
         gallery = f'<div class="gallery">{imgs}</div>' if imgs else ""
         title = f"<h3>{esc(p['title'])}</h3>" if p.get("title") else ""
+        n = p.get("had_images", 0)
+        note = (f'<p class="dropped">{n} photo{"s" if n != 1 else ""} removed to save space</p>'
+                if p.get("archived") and n else "")
         items.append(f"""    <li class="post">
       <time datetime="{esc(p.get('date',''))}">{esc(fmt_date(p.get('date')))}</time>
       {title}
       <div class="body">{paras(p.get('body'))}</div>
-      {gallery}
+      {gallery}{note}
     </li>""")
+    return items
 
-    body = ("\n".join(items) if items
-            else '<li class="empty">Nothing here yet. Send an email to fill this page.</li>')
 
-    out = head(f"{k['short']} — {SITE['title']}") + f"""<div class="topbar"><div class="wrap">
-  <a class="back" href="index.html">&larr; {esc(SITE['title'])}</a>
+def page(k, posts, *, archive):
+    items = render_posts(k, posts)
+    if items:
+        body = "\n".join(items)
+    elif archive:
+        body = '<li class="empty">Nothing archived yet.</li>'
+    else:
+        body = '<li class="empty">Nothing here yet. Send an email to fill this page.</li>'
+
+    if archive:
+        title, sub = f"{k['short']} — earlier posts", "Earlier posts"
+        back = f'<a class="back" href="{esc(k["slug"])}.html">&larr; {esc(k["short"])}</a>'
+        link = ""
+    else:
+        title, sub = f"{k['short']} — {SITE['title']}", esc(SITE["city"])
+        back = f'<a class="back" href="index.html">&larr; {esc(SITE["title"])}</a>'
+        n = len(load_posts(k["slug"], archived=True))
+        link = (f'<p class="more"><a href="{esc(k["slug"])}-archive.html">'
+                f'Earlier posts ({n}) &rarr;</a></p>' if n else "")
+
+    out = head(title) + f"""<div class="topbar"><div class="wrap">
+  {back}
 </div></div>
 
 <main class="wrap" style="--k:{esc(k['colour'])}">
   <div class="kidhead">
     <h1>{esc(k['name'])}</h1>
-    <p>{esc(SITE['city'])}</p>
+    <p>{sub}</p>
   </div>
   <ul class="posts">
 {body}
   </ul>
+  {link}
 </main>
 
 <footer>Last built {datetime.datetime.now(datetime.timezone.utc).strftime('%-d %B %Y, %H:%M UTC')}</footer>
 </body>
 </html>
 """
-    (ROOT / f"{k['slug']}.html").write_text(out, encoding="utf-8")
+    name = f"{k['slug']}-archive.html" if archive else f"{k['slug']}.html"
+    (ROOT / name).write_text(out, encoding="utf-8")
+
+
+def build_kid(k):
+    page(k, load_posts(k["slug"]), archive=False)
+    old = load_posts(k["slug"], archived=True)
+    if old:
+        page(k, old, archive=True)
 
 
 if __name__ == "__main__":

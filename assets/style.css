@@ -76,3 +76,7 @@ a{color:inherit}
 .gallery img{border-radius:12px; border:1px solid var(--line); background:var(--surface)}
 .empty{padding:56px 0; color:var(--muted); text-align:center}
 footer{padding:40px 0 60px; color:var(--muted); font-size:.85rem; text-align:center}
+.dropped{margin:12px 0 0; font-size:.8rem; color:var(--muted); font-style:italic}
+.more{margin:28px 0 0; text-align:center}
+.more a{color:var(--k); font-weight:600; font-size:.9rem; text-decoration:none}
+.more a:hover{text-decoration:underline}

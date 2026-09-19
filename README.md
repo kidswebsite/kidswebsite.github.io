@@ -92,10 +92,38 @@ becomes the post title, the body the text, and attached or inline photos the
 gallery. Quoted replies and "Sent from my iPhone" are trimmed; photos are
 shrunk to 1600 px.
 
-## Removing a post
+## Deleting a post
 
-Edit the relevant `content/<name>.json`, delete the entry and its files under
-`media/`, commit and push. The site rebuilds on push.
+The child resends their own email with `delete:` in front of the subject:
+
+| Subject | Effect |
+|---|---|
+| `delete: Sports day` | removes their post titled "Sports day", and its photos |
+| `delete: last` | removes their most recent post |
+
+A child can only ever delete their own posts — the page is chosen by the
+sender's address, never by anything in the subject, so `delete:` in a sibling's
+mail does nothing to this page. A subject that merely contains the word
+"delete" is treated as an ordinary post; only the `delete:` prefix is a command.
+Deletion is permanent.
+
+You can also edit `content/<name>.json` by hand, remove the entry and its files
+under `media/`, and push.
+
+## The photo budget
+
+`media_budget_mb` in `site.json` (300 MB) caps the photos the site carries.
+When it is exceeded, `scripts/prune.py` archives the oldest posts: their photo
+files are deleted and the posts move to `<name>-archive.html`, keeping their
+title and text for good, with a line saying a photo was removed. Words are
+never deleted — only photos, oldest first. The split is a clean date cutoff, so
+each main page holds the recent posts and the archive holds everything older.
+
+Pruning frees space on the published site, but git keeps every photo ever
+committed, so `.git` grows regardless. `scripts/compact_history.sh` flattens
+the repository to a single commit and force-pushes, which is the only thing
+that actually reclaims that space. Run it once a year. It rewrites published
+history, so any other clone must be re-cloned afterwards.
 
 ## Local preview
 

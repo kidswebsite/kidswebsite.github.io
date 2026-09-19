@@ -37,6 +37,9 @@ jobs:
           SENDER_MAP: ${{ secrets.SENDER_MAP }}
         run: python scripts/fetch_mail.py
 
+      - name: Keep within the photo budget
+        run: python scripts/prune.py
+
       - name: Rebuild pages
         run: python scripts/build.py
 
