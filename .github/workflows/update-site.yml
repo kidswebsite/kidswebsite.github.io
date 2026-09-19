@@ -2,7 +2,7 @@ name: Update site from email
 
 on:
   schedule:
-    - cron: "*/15 * * * *"     # every 15 minutes
+    - cron: "*/5 * * * *"      # every 5 minutes (GitHub's minimum)
   workflow_dispatch:            # lets you run it by hand from the Actions tab
   push:
     branches: [main]

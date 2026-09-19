@@ -82,8 +82,9 @@ than in the repository so they are never published.
 ### 5. Run it
 
 Actions tab → *Update site from email* → **Run workflow**. After that it runs
-by itself every 15 minutes. GitHub can delay scheduled runs when busy, so a gap
-of half an hour now and then is normal.
+by itself every 5 minutes. 5 minutes is GitHub's minimum for scheduled runs, and it
+deprioritises them under load, so 5-10 minutes is typical and the odd longer
+gap is normal. Hard-refresh the page; browsers cache it.
 
 ## How to post
 
