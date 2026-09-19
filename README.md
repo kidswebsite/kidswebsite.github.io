@@ -105,8 +105,9 @@ A child can only ever delete their own posts — the page is chosen by the
 sender's address, never by anything in the subject, so `delete:` in a sibling's
 mail does nothing to this page. Only a `delete:` prefix at the very start is a command. A subject that merely
 contains the word — "deletion of Day 3", "please delete: X", "Re: delete: X" —
-is an ordinary post. `Re:` and `Fwd:` prefixes are ignored when matching a
-title, so forwarding the original email works.
+is an ordinary post. When matching a title, quotes around it and any `Re:`/`Fwd:` prefixes are
+ignored, so `delete: "Does it work?"` and `delete: Fwd: Does it work?` both
+work, as does any capitalisation.
 Deletion is permanent.
 
 You can also edit `content/<name>.json` by hand, remove the entry and its files

@@ -152,9 +152,21 @@ DELETE_RE = re.compile(r"^\s*delete\s*:\s*(.*)$", re.I)
 REPLY_RE = re.compile(r"^\s*((re|fwd|fw|aw|tr|r)\s*:\s*)+", re.I)
 
 
+# People naturally quote the title they are deleting: delete: "Does it work?"
+QUOTES = "\"'\u2018\u2019\u201c\u201d\u00ab\u00bb\u201a\u201e"
+
+
 def norm(t):
-    t = REPLY_RE.sub("", t or "")
-    return re.sub(r"\s+", " ", t).strip().lower()
+    """Compare titles the way a person would: ignore case, extra spaces, any
+    quotes they wrapped the title in, and Re:/Fwd: prefixes in any order."""
+    t = re.sub(r"\s+", " ", t or "").strip()
+    previous = None
+    while t != previous:
+        previous = t
+        t = REPLY_RE.sub("", t).strip()
+        if len(t) > 1 and t[0] in QUOTES and t[-1] in QUOTES:
+            t = t[1:-1].strip()
+    return t.strip(QUOTES).strip().lower()
 
 
 def delete_post(slug, target):
