@@ -143,11 +143,18 @@ def save_image(slug, post_id, index, filename, ctype, payload):
     return f"media/{slug}/{path.name}"
 
 
+# Only a "delete:" prefix at the very start is a command. A subject that merely
+# contains the word delete ("deletion of Day 3", "how to delete a post") is an
+# ordinary post.
 DELETE_RE = re.compile(r"^\s*delete\s*:\s*(.*)$", re.I)
+
+# Reply and Forward buttons prepend these; ignore them when matching titles.
+REPLY_RE = re.compile(r"^\s*((re|fwd|fw|aw|tr|r)\s*:\s*)+", re.I)
 
 
 def norm(t):
-    return re.sub(r"\s+", " ", (t or "")).strip().lower()
+    t = REPLY_RE.sub("", t or "")
+    return re.sub(r"\s+", " ", t).strip().lower()
 
 
 def delete_post(slug, target):
