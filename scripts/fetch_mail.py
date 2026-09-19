@@ -21,6 +21,12 @@ import os, re, ssl, json, email, imaplib, hashlib, pathlib, mimetypes, datetime
 from email.header import decode_header, make_header
 from email.utils import parsedate_to_datetime, getaddresses
 
+try:                                  # iPhone photos arrive as HEIC
+    from pillow_heif import register_heif_opener
+    register_heif_opener()
+except ImportError:
+    print("warning: pillow-heif missing, HEIC photos will be dropped")
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SITE = json.loads((ROOT / "site.json").read_text(encoding="utf-8"))
 KIDS = {k["slug"]: k for k in SITE["kids"]}
@@ -78,6 +84,7 @@ def clean_body(text):
             break
         if line.strip().startswith(">"):
             continue
+        line = re.sub(r"\[image:[^\]]*\]", "", line)
         lines.append(line.rstrip())
     return re.sub(r"\n{3,}", "\n\n", "\n".join(lines).strip())
 
@@ -102,9 +109,9 @@ def extract(msg):
 
 def save_image(slug, post_id, index, filename, ctype, payload):
     ext = pathlib.Path(filename).suffix.lower() or mimetypes.guess_extension(ctype) or ".jpg"
-    if ext in (".jpe", ".jpeg"):
-        ext = ".jpg"
-    if ext not in (".jpg", ".png", ".gif", ".webp", ".heic", ".heif"):
+    if ext in (".jpe", ".jpeg", ".heic", ".heif"):
+        ext = ".jpg"               # HEIC is re-encoded to JPEG below
+    if ext not in (".jpg", ".png", ".gif", ".webp"):
         ext = ".jpg"
     folder = MEDIA / slug
     folder.mkdir(parents=True, exist_ok=True)
@@ -120,6 +127,8 @@ def save_image(slug, post_id, index, filename, ctype, payload):
             if max(im.size) > MAX_PX:
                 im.thumbnail((MAX_PX, MAX_PX), Image.LANCZOS)
             if im.mode in ("RGBA", "P") and ext == ".jpg":
+                im = im.convert("RGB")
+            if im.mode not in ("RGB", "L") and ext == ".jpg":
                 im = im.convert("RGB")
             clean = Image.new(im.mode, im.size)
             clean.putdata(list(im.getdata()))
